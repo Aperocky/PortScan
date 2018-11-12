@@ -1,3 +1,4 @@
+#!/usr/local/opt/python/bin/python3.7
 import socket
 import threading
 import argparse
@@ -14,7 +15,7 @@ class PortScan:
     BLOCK_24 = r'^(?:\d{1,3}\.){3}0\/24$'
     GROUPED_IP = r'^\[.*\]$'
 
-    def __init__(self, ip_str, port_str = None, thread_num = 100):
+    def __init__(self, ip_str, port_str = None, thread_num = 100, show_refused=False):
         # self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # self.sock.settimeout(10)
         self.ip_range = self.read_ip(ip_str)
@@ -26,6 +27,7 @@ class PortScan:
         self.thread_num = thread_num
         self.q = Queue(maxsize=self.thread_num*2)
         self.gen = None # Generator instance to be instantiated later
+        self.show_refused = show_refused
 
     # Read in IP Address from string.
     def read_ip(self, ip_str):
@@ -109,16 +111,21 @@ class PortScan:
         if status == 0:
             with self.lock:
                 print('{}:{} OPEN'.format(ip, port))
-        elif status != 35:
+        elif status not in [35, 64, 65] and self.show_refused:
             with self.lock:
                 print('{}:{} ERRNO {}, {}'.format(ip, port, status, os.strerror(status)))
         return
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('ip')
     parser.add_argument('-p', '--port', action='store', dest='port')
     parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=100, type=int)
+    parser.add_argument('-e', '--show_refused', action='store_true', dest='show_refused', default=False)
     args = parser.parse_args()
-    scanner = PortScan(ip_str=args.ip, port_str=args.port, thread_num=args.threadnum)
+    scanner = PortScan(ip_str=args.ip, port_str=args.port,
+                       thread_num=args.threadnum, show_refused=args.show_refused)
     scanner.run()
+
+if __name__ == '__main__':
+    main()
