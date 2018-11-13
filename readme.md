@@ -8,6 +8,8 @@ Usage: `portscan 8.8.8.8 [-p 22,80 [-t 100 [-e]]]`
 
 ![Simple Command](/Demo_0.png)
 
+To show more potential connection, use `-e`, this will show you all ports that are not timed out.
+
 ![Show more potential connection](/Demo_1.png)
 
 `ip`: default and required argument, can parse single IP, list of IP, IP blocks:
