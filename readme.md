@@ -1,12 +1,14 @@
 # PortScan
 
----
-
 PortScan is a command line utility that allows user to conduct scanning over a range of IP addresses and port ranges.
 
 Install: `pip install portscan`
 
-Usage: `portscan 192.168.1.0/24 [-p 22,80 [-t 100 [-e]]]`
+Usage: `portscan 8.8.8.8 [-p 22,80 [-t 100 [-e]]]`
+
+![Simple Command](/Demo_0.png)
+
+![Show more potential connection](/Demo_1.png)
 
 `ip`: default and required argument, can parse single IP, list of IP, IP blocks:
 
