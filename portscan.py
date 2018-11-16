@@ -18,12 +18,12 @@ class PortScan:
     BLOCK_24 = r'^(?:\d{1,3}\.){3}0\/24$'
     GROUPED_IP = r'^\[.*\]$'
 
-    def __init__(self, ip_str, port_str = None, thread_num = 100, show_refused=False):
+    def __init__(self, ip_str, port_str = None, thread_num = 100, show_refused=False, wait_time=5):
         # self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # self.sock.settimeout(10)
         self.ip_range = self.read_ip(ip_str)
         if port_str is None:
-            self.ports = [22, 23, 80, 5000, 8000, 8080, 8888]
+            self.ports = [22, 23, 80]
         else:
             self.ports = self.read_port(port_str)
         self.lock = threading.Lock()
@@ -33,6 +33,7 @@ class PortScan:
         self.q = Queue(maxsize=self.thread_num*2)
         self.gen = None # Generator instance to be instantiated later
         self.show_refused = show_refused
+        self.wait_time = wait_time
 
     # Read in IP Address from string.
     def read_ip(self, ip_str):
@@ -87,7 +88,7 @@ class PortScan:
                 except StopIteration:
                     break
             else:
-                time.sleep(0.1)
+                time.sleep(0.05)
         return
 
     def run(self):
@@ -111,7 +112,7 @@ class PortScan:
 
     def ping_port(self, ip, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(5)
+        sock.settimeout(self.wait_time)
         status = sock.connect_ex((ip, port))
         if status == 0:
             with self.lock:
@@ -127,9 +128,11 @@ def main():
     parser.add_argument('-p', '--port', action='store', dest='port')
     parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=100, type=int)
     parser.add_argument('-e', '--show_refused', action='store_true', dest='show_refused', default=False)
+    parser.add_argument('-w', '--wait', action='store', dest='wait_time', default=5, type=float)
     args = parser.parse_args()
     scanner = PortScan(ip_str=args.ip, port_str=args.port,
-                       thread_num=args.threadnum, show_refused=args.show_refused)
+                       thread_num=args.threadnum, show_refused=args.show_refused,
+                       wait_time=args.wait_time)
     scanner.run()
 
 if __name__ == '__main__':

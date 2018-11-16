@@ -10,11 +10,16 @@ Install: `pip install portscan`
 
 Usage: `portscan 8.8.8.8 [-p 22,80 [-t 100 [-e]]]`
 
-![Simple Command](/Demo_0.png)
+![Simple Command](/images/Demo_0.png)
 
 To show more potential connection, use `-e`, this will show you all ports that are not timed out.
 
-![Show more potential connection](/Demo_1.png)
+![Show more potential connection](/images/Demo_1.png)
+
+Use `-w [float]` to change timeout settings from 5 seconds: for LAN, this can be as low as `0.1`, `1` is usually good enough for continental level connection.
+
+![Scanning fast](/images/Demo_2.png)
+*Scanned 5000 ports in 4 seconds*
 
 `ip`: default and required argument, can parse single IP, list of IP, IP blocks:
 
@@ -34,3 +39,4 @@ Options:
 
 `-e`, `--show_refused`: show connection errors other than timeouts, e.g. connection refused, permission denied with errno number as they happen.
 
+`-w`, `--wait`: Wait time for socket to respond. If scanning home internet or relatively fast internet connection, this can be set to `1` or even `0.2` for faster scanning.
