@@ -8,18 +8,20 @@ PortScan is a *light-weight* command line utility that allows user to conduct sc
 
 Install: `pip install portscan`
 
-Usage: `portscan 8.8.8.8 [-p 22,80 [-t 100 [-e]]]`
+Usage: `portscan 8.8.8.8 [-p 22,80 [-t 100 [-w 1 [-e]]]]`
 
 ![Simple Command](/images/Demo_0.png)
+
+Use `-w [float]` to change timeout settings from default of `5` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
+
+![Fast scanning](/images/Demo_2.png)
+*Scanned 5000 ports in 4 seconds*
 
 To show more potential connection, use `-e`, this will show you all ports that are not timed out.
 
 ![Show more potential connection](/images/Demo_1.png)
 
-Use `-w [float]` to change timeout settings from default of `5` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
-
-![Scanning fast](/images/Demo_2.png)
-*Scanned 5000 ports in 4 seconds*
+### Arguments
 
 `ip`: default and required argument, can parse single IP, list of IP, IP blocks:
 
