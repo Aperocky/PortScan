@@ -4,8 +4,11 @@ import threading
 import argparse
 import re
 import os
-from queue import Queue
 import time
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue
 
 # A multithreading portscan module
 class PortScan:
@@ -25,6 +28,8 @@ class PortScan:
             self.ports = self.read_port(port_str)
         self.lock = threading.Lock()
         self.thread_num = thread_num
+        if self.thread_num > 250:
+            self.thread_num = 250
         self.q = Queue(maxsize=self.thread_num*2)
         self.gen = None # Generator instance to be instantiated later
         self.show_refused = show_refused

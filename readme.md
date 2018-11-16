@@ -26,7 +26,7 @@ Options:
 
 `-p`, `--port`: port range, default `22,23,80,5000,8000,8080,8888`, use `,` as a delimiter without space, support port range (e.g. `22-100,5000`).
 
-`-t`, `--threadnum`: thread numbers, default 100
+`-t`, `--threadnum`: thread numbers, default 100, as of now, thread number have been limited to 250 to avoid `errno 24`
 
 `-e`, `--show_refused`: show connection errors other than timeouts, e.g. connection refused, permission denied with errno number as they happen.
 
