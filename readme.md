@@ -1,5 +1,9 @@
 # PortScan
 
+![PyPI version](http://img.shields.io/pypi/v/portscan.svg) &nbsp; ![Python 3.x](http://img.shields.io/badge/Python-3.x-green.svg) &nbsp; ![Python 2.x](http://img.shields.io/badge/Python-2.x-green.svg) &nbsp; ![PyPI license](https://img.shields.io/github/license/mashape/apistatus.svg)
+
+---
+
 PortScan is a *light-weight* command line utility that allows user to conduct scanning over a range of IP addresses and port ranges with multi-threading.
 
 Install: `pip install portscan`
@@ -30,6 +34,3 @@ Options:
 
 `-e`, `--show_refused`: show connection errors other than timeouts, e.g. connection refused, permission denied with errno number as they happen.
 
----
-
-![PyPI version](http://img.shields.io/pypi/v/termdown.svg) &nbsp; ![Python 3.x](http://img.shields.io/badge/Python-3.x-green.svg) &nbsp; ![PyPI license](https://img.shields.io/github/license/mashape/apistatus.svg)
