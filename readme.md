@@ -1,6 +1,6 @@
 # PortScan
 
-PortScan is a command line utility that allows user to conduct scanning over a range of IP addresses and port ranges.
+PortScan is a *light-weight* command line utility that allows user to conduct scanning over a range of IP addresses and port ranges with multi-threading.
 
 Install: `pip install portscan`
 
