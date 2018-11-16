@@ -16,7 +16,7 @@ To show more potential connection, use `-e`, this will show you all ports that a
 
 ![Show more potential connection](/images/Demo_1.png)
 
-Use `-w [float]` to change timeout settings from 5 seconds: for LAN, this can be as low as `0.1`, `1` is usually good enough for continental level connection.
+Use `-w [float]` to change timeout settings from default of `5` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
 
 ![Scanning fast](/images/Demo_2.png)
 *Scanned 5000 ports in 4 seconds*
@@ -39,4 +39,4 @@ Options:
 
 `-e`, `--show_refused`: show connection errors other than timeouts, e.g. connection refused, permission denied with errno number as they happen.
 
-`-w`, `--wait`: Wait time for socket to respond. If scanning home internet or relatively fast internet connection, this can be set to `1` or even `0.2` for faster scanning.
+`-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.2` for faster scanning.
