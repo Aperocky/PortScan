@@ -1,8 +1,6 @@
 # PortScan
 
-![PyPI version](http://img.shields.io/pypi/v/portscan.svg) &nbsp; ![Python 3.x](http://img.shields.io/badge/Python-3.x-green.svg) &nbsp; ![Python 2.x](http://img.shields.io/badge/Python-2.x-green.svg) &nbsp; ![PyPI license](https://img.shields.io/github/license/mashape/apistatus.svg)
-
----
+![PyPI version](http://img.shields.io/pypi/v/portscan.svg) &nbsp; ![Python 3.x](http://img.shields.io/badge/Python-3.x-green.svg) &nbsp; ![PyPI license](https://img.shields.io/github/license/mashape/apistatus.svg) &nbsp; [![Downloads](https://pepy.tech/badge/portscan)](https://pepy.tech/project/portscan)
 
 PortScan is a *light-weight* command line utility that allows user to conduct scanning over a range of IP addresses and port ranges with multi-threading.
 
