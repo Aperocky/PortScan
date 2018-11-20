@@ -8,7 +8,7 @@ PortScan is a *light-weight* command line utility that allows user to conduct sc
 
 Install: `pip install portscan`
 
-Usage: `portscan 8.8.8.8 [-p 22,80 [-t 100 [-w 1 [-e]]]]`
+Usage: `portscan 192.168.1.0/24 [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
 
 ![Simple Command](/images/Demo_0.png)
 
