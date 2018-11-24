@@ -33,10 +33,10 @@ To show more potential connection, use `-e`, this will show you all ports that a
 
 Options:
 
-`-p`, `--port`: port range, default `22,23,80,5000,8000,8080,8888`, use `,` as a delimiter without space, support port range (e.g. `22-100,5000`).
+`-p`, `--port`: port range, default `22,23,80`, use `,` as a delimiter without space, support port range (e.g. `22-100,5000`).
 
-`-t`, `--threadnum`: thread numbers, default 100, as of now, thread number have been limited to 250 to avoid `errno 24`
+`-t`, `--threadnum`: thread numbers, default 500, as of now, thread number have a hard cap of 2048. More thread will increase performance on large scale scans.
 
 `-e`, `--show_refused`: show connection errors other than timeouts, e.g. connection refused, permission denied with errno number as they happen.
 
-`-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.2` for faster scanning.
+`-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.2` for faster scanning. Default `3` seconds

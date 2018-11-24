@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
     name="portscan",
-    version="0.1.2",
+    version="0.2.0",
     description="Simple port scanning utility at terminal",
     author="Rocky Li",
     author_email="aperocky@gmail.com",
@@ -27,7 +27,6 @@ setup(
         "Operating System :: POSIX",
         "Operating System :: Unix",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 2",
         "Topic :: Utilities",
     ],
     install_requires=[],

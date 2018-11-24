@@ -9,6 +9,10 @@ try:
     from queue import Queue
 except ImportError:
     from Queue import Queue
+import resource
+# Expand thread number possible with extended FILE count.
+# This remain as low as 2048 due to macOS secret open limit, unfortunately
+resource.setrlimit(resource.RLIMIT_NOFILE, (2048, 2048))
 
 # A multithreading portscan module
 class PortScan:
@@ -18,7 +22,7 @@ class PortScan:
     BLOCK_24 = r'^(?:\d{1,3}\.){3}0\/24$'
     GROUPED_IP = r'^\[.*\]$'
 
-    def __init__(self, ip_str, port_str = None, thread_num = 100, show_refused=False, wait_time=5):
+    def __init__(self, ip_str, port_str = None, thread_num = 500, show_refused=False, wait_time=3):
         # self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # self.sock.settimeout(10)
         self.ip_range = self.read_ip(ip_str)
@@ -26,11 +30,11 @@ class PortScan:
             self.ports = [22, 23, 80]
         else:
             self.ports = self.read_port(port_str)
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
         self.thread_num = thread_num
-        if self.thread_num > 250:
-            self.thread_num = 250
-        self.q = Queue(maxsize=self.thread_num*2)
+        if self.thread_num > 2047:
+            self.thread_num = 2047
+        self.q = Queue(maxsize=self.thread_num*5)
         self.gen = None # Generator instance to be instantiated later
         self.show_refused = show_refused
         self.wait_time = wait_time
@@ -88,7 +92,7 @@ class PortScan:
                 except StopIteration:
                     break
             else:
-                time.sleep(0.05)
+                time.sleep(0.01)
         return
 
     def run(self):
@@ -126,7 +130,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('ip')
     parser.add_argument('-p', '--port', action='store', dest='port')
-    parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=100, type=int)
+    parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=500, type=int)
     parser.add_argument('-e', '--show_refused', action='store_true', dest='show_refused', default=False)
     parser.add_argument('-w', '--wait', action='store', dest='wait_time', default=5, type=float)
     args = parser.parse_args()
