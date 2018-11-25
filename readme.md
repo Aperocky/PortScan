@@ -13,7 +13,7 @@ Usage: `portscan 192.168.1.0/24 [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
 Use `-w [float]` to change timeout settings from default of `5` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
 
 ![Fast scanning](/images/Demo_2.png)
-*Scanned 5000 ports in 4 seconds*
+*Scanned 5000 ports in 2 seconds*
 
 To show more potential connection, use `-e`, this will show you all ports that are not timed out.
 
