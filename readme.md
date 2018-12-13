@@ -12,7 +12,7 @@ Usage: `portscan [192.168.1.0/24] [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
 
 ![Simple Command](/images/Demo_3.png)
 
-By default the command checks for your *Local Area Network* IP first, and then initiate a block wise search. specify IP if you want to search any other IP blocks.
+By default the command checks for your *Local Area Network* IP first, and then initiate a block wise search. specify IP if you want to search any other IP blocks. *Note: This is not available before 0.2.1, please update or specify IP if you're using 0.2.0 and older*
 
 Use `-w [float]` to change timeout settings from default of `3` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
 
