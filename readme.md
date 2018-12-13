@@ -6,11 +6,15 @@ PortScan is a *light-weight* command line utility that allows user to conduct sc
 
 Install: `pip install portscan`
 
-Usage: `portscan 192.168.1.0/24 [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
+Usage: `portscan [192.168.1.0/24] [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
 
-![Simple Command](/images/Demo_0.png)
+*New in version 0.2.1:*
 
-Use `-w [float]` to change timeout settings from default of `5` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
+![Simple Command](/images/Demo_3.png)
+
+By default the command checks for your *Local Area Network* IP first, and then initiate a block wise search. specify IP if you want to search any other IP blocks.
+
+Use `-w [float]` to change timeout settings from default of `3` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
 
 ![Fast scanning](/images/Demo_2.png)
 *Scanned 5000 ports in 2 seconds*
@@ -21,7 +25,7 @@ To show more potential connection, use `-e`, this will show you all ports that a
 
 ### Arguments
 
-`ip`: default and required argument, can parse single IP, list of IP, IP blocks:
+`ip`: default and optional *(since 0.2.1, required before 0.2.1)* argument, can parse single IP, list of IP, IP blocks:
 
     192.168.1.0 # single IP
 

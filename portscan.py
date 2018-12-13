@@ -126,18 +126,41 @@ class PortScan:
                 print('{}:{} ERRNO {}, {}'.format(ip, port, status, os.strerror(status)))
         return
 
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('ip')
+    parser.add_argument('ip', nargs='?', default=None)
     parser.add_argument('-p', '--port', action='store', dest='port')
     parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=500, type=int)
     parser.add_argument('-e', '--show_refused', action='store_true', dest='show_refused', default=False)
     parser.add_argument('-w', '--wait', action='store', dest='wait_time', default=5, type=float)
     args = parser.parse_args()
+    if args.ip is None:
+        print("No IP string found, using local address")
+        ip = get_local_ip()
+        print("Local IP found to be {}, scanning entire block".format(ip))
+        ipblocks = ip.split('.')
+        ipblocks[-1] = '0/24'
+        ipfinal = '.'.join(ipblocks)
+        args.ip = ipfinal
     scanner = PortScan(ip_str=args.ip, port_str=args.port,
                        thread_num=args.threadnum, show_refused=args.show_refused,
                        wait_time=args.wait_time)
     scanner.run()
+
 
 if __name__ == '__main__':
     main()
