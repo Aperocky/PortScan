@@ -49,6 +49,4 @@ Options:
 
 ## Acknowledgement
 
----
-
 Jamieson Becker: For coming up with a way to find local IP on stackoverflow, which I used: https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
