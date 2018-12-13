@@ -46,3 +46,9 @@ Options:
 `-e`, `--show_refused`: show connection errors other than timeouts, e.g. connection refused, permission denied with errno number as they happen.
 
 `-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.2` for faster scanning. Default `3` seconds
+
+## Acknowledgement
+
+---
+
+Jamieson Becker: For coming up with a way to find local IP on stackoverflow, which I used: https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
