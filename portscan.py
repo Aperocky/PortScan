@@ -23,8 +23,6 @@ class PortScan:
     GROUPED_IP = r'^\[.*\]$'
 
     def __init__(self, ip_str, port_str = None, thread_num = 500, show_refused=False, wait_time=3):
-        # self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # self.sock.settimeout(10)
         self.ip_range = self.read_ip(ip_str)
         if port_str is None:
             self.ports = [22, 23, 80]
@@ -38,6 +36,7 @@ class PortScan:
         self.gen = None # Generator instance to be instantiated later
         self.show_refused = show_refused
         self.wait_time = wait_time
+        self.queue_status = False
 
     # Read in IP Address from string.
     def read_ip(self, ip_str):
@@ -90,6 +89,9 @@ class PortScan:
                 try:
                     self.q.put(next(self.gen))
                 except StopIteration:
+                    # Break condition
+                    self.queue_status = True
+                    # print("STOPITERATION") # DEBUG: STOPITERATION should always appear.
                     break
             else:
                 time.sleep(0.01)
@@ -105,6 +107,10 @@ class PortScan:
             t = threading.Thread(target=self.worker)
             t.daemon = True
             t.start()
+        if not self.queue_status:
+            # StopIteration has to be raised (generator completed)
+            # Before master thread finishes.
+            time.sleep(0.1)
         self.q.join()
 
     def worker(self):
