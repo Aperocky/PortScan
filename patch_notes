@@ -1,0 +1,1 @@
+Version 0.3.0: Fixed major bug relating to premature ending of queue. Force ending of queue to be preceded by stopiteration of the generator.
