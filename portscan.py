@@ -9,10 +9,13 @@ try:
     from queue import Queue
 except ImportError:
     from Queue import Queue
-import resource
-# Expand thread number possible with extended FILE count.
-# This remain as low as 2048 due to macOS secret open limit, unfortunately
-resource.setrlimit(resource.RLIMIT_NOFILE, (2048, 2048))
+try:
+    import resource
+    # Expand thread number possible with extended FILE count.
+    # This remain as low as 2048 due to macOS secret open limit, unfortunately
+    resource.setrlimit(resource.RLIMIT_NOFILE, (2048, 2048))
+except ModuleNotFoundError:
+    pass  # for windows support, skip this limitation
 
 # A multithreading portscan module
 class PortScan:
@@ -22,7 +25,7 @@ class PortScan:
     BLOCK_24 = r'^(?:\d{1,3}\.){3}0\/24$'
     GROUPED_IP = r'^\[.*\]$'
 
-    def __init__(self, ip_str, port_str = None, thread_num = 500, show_refused=False, wait_time=3):
+    def __init__(self, ip_str, port_str = None, thread_num = 500, show_refused=False, wait_time=3, stop_after_open=False):
         self.ip_range = self.read_ip(ip_str)
         if port_str is None:
             self.ports = [22, 23, 80]
@@ -37,6 +40,7 @@ class PortScan:
         self.show_refused = show_refused
         self.wait_time = wait_time
         self.queue_status = False
+        self.stop_after_open=stop_after_open
 
     # Read in IP Address from string.
     def read_ip(self, ip_str):
@@ -84,7 +88,7 @@ class PortScan:
 
     # Standalone thread for queue
     def fill_queue(self):
-        while True:
+        while self.stop_after_open!='now':
             if not self.q.full():
                 try:
                     self.q.put(next(self.gen))
@@ -103,6 +107,7 @@ class PortScan:
         queue_thread = threading.Thread(target=self.fill_queue)
         queue_thread.daemon = True
         queue_thread.start()
+        self.open_results = []
         for i in range(self.thread_num):
             t = threading.Thread(target=self.worker)
             t.daemon = True
@@ -112,21 +117,29 @@ class PortScan:
             # Before master thread finishes.
             time.sleep(0.1)
         self.q.join()
+        return self.open_results
 
     def worker(self):
         # Worker threads that take ports from queue and consume it
         while True: # never stop working!
             work = self.q.get()
-            self.ping_port(*work)
-            self.q.task_done()
+            try:
+                if self.stop_after_open!='now':
+                    self.ping_port(*work)
+            finally: self.q.task_done()
 
+        
     def ping_port(self, ip, port):
+        # print(port,end=' ')
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(self.wait_time)
         status = sock.connect_ex((ip, port))
         if status == 0:
             with self.lock:
                 print('{}:{} OPEN'.format(ip, port))
+                self.open_results.append((ip,port))
+                if self.stop_after_open:
+                    self.stop_after_open='now' if self.stop_after_open in [1,True] else self.stop_after_open-1
         elif status not in [35, 64, 65] and self.show_refused:
             with self.lock:
                 print('{}:{} ERRNO {}, {}'.format(ip, port, status, os.strerror(status)))
@@ -153,6 +166,7 @@ def main():
     parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=500, type=int)
     parser.add_argument('-e', '--show_refused', action='store_true', dest='show_refused', default=False)
     parser.add_argument('-w', '--wait', action='store', dest='wait_time', default=5, type=float)
+    parser.add_argument('-s', '--stop_after', action='store', dest='stop_after_open', default=0, type=int)
     args = parser.parse_args()
     if args.ip is None:
         print("No IP string found, using local address")
@@ -164,7 +178,7 @@ def main():
         args.ip = ipfinal
     scanner = PortScan(ip_str=args.ip, port_str=args.port,
                        thread_num=args.threadnum, show_refused=args.show_refused,
-                       wait_time=args.wait_time)
+                       wait_time=args.wait_time, stop_after_open=args.stop_after_open)
     scanner.run()
 
 
