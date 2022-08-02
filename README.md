@@ -1,14 +1,21 @@
 # PortScan
+PyPi Project: beard-portscan
 
-![PyPI version](http://img.shields.io/pypi/v/portscan.svg) &nbsp; ![Python 3.x](http://img.shields.io/badge/Python-3.x-green.svg) &nbsp; ![PyPI license](https://img.shields.io/github/license/mashape/apistatus.svg) &nbsp; [![Downloads](https://pepy.tech/badge/portscan)](https://pepy.tech/project/portscan)
+![PyPI](https://img.shields.io/pypi/v/beard-portscan) &nbsp; ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/beard-portscan) &nbsp; ![PyPI - License](https://img.shields.io/pypi/l/beard-portscan)
 
-PortScan is a *light-weight* command line utility that allows user to conduct scanning over a range of IP addresses and port ranges with multi-threading.
+- 0.1.0: Initial Release after Fork
+    - Outputs a list of dicts
 
-Install: `pip install portscan`
+Install: `pip install beard-portscan`
 
-Upgrade: `pip install portscan --upgrade`
+Upgrade: `pip install beard-portscan --upgrade`
 
 Usage: `portscan [192.168.1.0/24] [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
+
+## Forked from [Aperocky/PortScan](https://github.com/aperocky/PortScan)
+### All Information below this line is from the original REPO.
+
+PortScan is a *light-weight* command line utility that allows user to conduct scanning over a range of IP addresses and port ranges with multi-threading.
 
 *New in version 0.2.1:*
 

@@ -1,1 +1,5 @@
 *.pyc
+beard_portscan.egg-info/*
+dist
+env
+build
