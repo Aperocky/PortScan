@@ -5,6 +5,7 @@ import argparse
 import re
 import os
 import time
+import json
 try:
     from queue import Queue
 except ImportError:
@@ -13,7 +14,7 @@ import resource
 # Expand thread number possible with extended FILE count.
 # This remain as low as 2048 due to macOS secret open limit, unfortunately
 resource.setrlimit(resource.RLIMIT_NOFILE, (2048, 2048))
-
+json.dumps
 # A multithreading portscan module
 class PortScan:
 
@@ -22,7 +23,7 @@ class PortScan:
     BLOCK_24 = r'^(?:\d{1,3}\.){3}0\/24$'
     GROUPED_IP = r'^\[.*\]$'
 
-    def __init__(self, ip_str, port_str = None, thread_num = 500, show_refused=False, wait_time=3):
+    def __init__(self, ip_str, port_str = None, thread_num = 500, show_refused=False, wait_time=3,stdout=True):
         self.ip_range = self.read_ip(ip_str)
         if port_str is None:
             self.ports = [22, 23, 80]
@@ -37,6 +38,8 @@ class PortScan:
         self.show_refused = show_refused
         self.wait_time = wait_time
         self.queue_status = False
+        self.output = []
+        self.stdout = stdout
 
     # Read in IP Address from string.
     def read_ip(self, ip_str):
@@ -112,25 +115,42 @@ class PortScan:
             # Before master thread finishes.
             time.sleep(0.1)
         self.q.join()
+        # If stdout True, return None, else return self.output
+        output = None if self.stdout else self.output
+        return output
 
     def worker(self):
         # Worker threads that take ports from queue and consume it
         while True: # never stop working!
             work = self.q.get()
-            self.ping_port(*work)
+            self.output.append(self.ping_port(*work))
             self.q.task_done()
 
     def ping_port(self, ip, port):
+        output = {}
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(self.wait_time)
         status = sock.connect_ex((ip, port))
         if status == 0:
             with self.lock:
-                print('{}:{} OPEN'.format(ip, port))
+                if self.stdout:
+                    stdout = '{}:{} OPEN'.format(ip, port)
+                else:
+                    output = {'ip': ip,'port':port,'open':True,'status':status,'errormsg':''}
         elif status not in [35, 64, 65] and self.show_refused:
             with self.lock:
-                print('{}:{} ERRNO {}, {}'.format(ip, port, status, os.strerror(status)))
-        return
+                if self.stdout:
+                    stdout = '{}:{} ERRNO {}, {}'.format(ip, port, status, os.strerror(status))
+                output = {'ip': ip,'port':port,'open':False,'status':status,'errormsg':os.strerror(status)}
+        else:
+            output=False
+            stdout=False
+        if self.stdout:
+            if stdout:
+                print(stdout)
+            output = None
+        if output:
+            return output
 
 
 def get_local_ip():
