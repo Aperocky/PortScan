@@ -10,15 +10,38 @@ Upgrade: `pip install portscan --upgrade`
 
 Usage: `portscan [192.168.1.0/24] [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
 
-![Simple Command](/images/Demo_0.png)
+```
+$ portscan -w 0.2
+No IP string found, using local address
+Local IP found to be 192.168.1.175, scanning entire block
+Threads will wait for ping response for 0.2 seconds
+192.168.1.1:80 OPEN
+192.168.1.1:443 OPEN
+192.168.1.167:443 OPEN
+192.168.1.167:80 OPEN
+Pinged 1024 ports
+```
 
 By default the command checks for your *Local Area Network* IP first, and then initiate a block wise search. specify IP if you want to search any other IP blocks. *Note: This is not available before 0.2.1, please update or specify IP if you're using 0.2.0 and older*
 
 Use `-w [float]` to change timeout settings from default of `3` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
 
-To show more potential connection, use `-e`, this will show you all ports that are not timed out.
+To show more ports that have denied/refused connection, use `-e`, this will show you all ports that are not timed out.
 
-![Show more potential connection](/images/Demo_1.png)
+```
+$ portscan 174.109.64.0/24 -w 0.5 -e
+Threads will wait for ping response for 0.5 seconds
+174.109.64.3:443 ERRNO 61, Connection refused
+174.109.64.3:23 ERRNO 61, Connection refused
+174.109.64.3:80 ERRNO 61, Connection refused
+174.109.64.3:22 ERRNO 61, Connection refused
+174.109.64.88:80 ERRNO 61, Connection refused
+174.109.64.88:23 ERRNO 61, Connection refused
+174.109.64.88:443 ERRNO 61, Connection refused
+174.109.64.88:22 ERRNO 61, Connection refused
+174.109.64.125:443 OPEN
+Pinged 1024 ports
+```
 
 ### Arguments
 

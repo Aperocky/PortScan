@@ -3,9 +3,12 @@ try:
 except ImportError:
     from distutils.core import setup
 
+with open("readme.md", encoding='utf-8') as f:
+    readme = f.read()
+
 setup(
     name="portscan",
-    version="1.0.1",
+    version="1.0.1.post2",
     description="Simple port scanning utility at terminal",
     author="Rocky Li",
     author_email="aperocky@gmail.com",
@@ -31,6 +34,8 @@ setup(
     ],
     install_requires=[],
     py_modules=['portscan'],
+    long_description=readme,
+    long_description_content_type='text/markdown',
     entry_points={
         'console_scripts': [
             "portscan=portscan:main",
