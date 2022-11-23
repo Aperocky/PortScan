@@ -47,6 +47,30 @@ Options:
 
 `-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.2` for faster scanning. Default `3` seconds
 
+`-s`, `--stop_after_open`: Number of open ports to be discovered after which scan would be gracefully stopped. Default `0` for not stopping.
+
+## Python API
+One can also use this portscan inside existing python scripts.  
+Consider following example for finding out adb port for Android device in LAN with static IP:
+```python
+from portscan import PortScan
+ip = '192.168.1.42'
+port_range = '5555,37000-44000'
+scanner = PortScan(ip, port_range, thread_num=500, show_refused=False, wait_time=1, stop_after_open=True)
+open_port_discovered = scanner.run()  # <----- actual scan
+# run returns a list of (ip, open_port) tuples
+adb_port = int(open_port_discovered[0][1])
+
+# Usecase specific part
+from adb_shell.adb_device import AdbDeviceTcp, AdbDeviceUsb
+device1 = AdbDeviceTcp(ip, adb_port, default_transport_timeout_s=9)
+device1.connect(rsa_keys=[python_rsa_signer], auth_timeout_s=0.1)  # adb connect
+# shell exec
+notifications_dump = device1.shell('dumpsys notification').encode().decode('ascii','ignore')
+device1.close()
+
+print(notifications_dump)
+```
 ## Acknowledgement
 
 Jamieson Becker: For coming up with a way to find local IP on stackoverflow, which I used: https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
