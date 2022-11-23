@@ -1,0 +1,4 @@
+build/
+dist/
+portscan.egg-info/
+**/*.swp

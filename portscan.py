@@ -31,7 +31,7 @@ class PortScan:
     def __init__(self, ip_str, port_str=None, thread_num=500, show_refused=False, wait_time=3, stop_after_count=None):
         self.ip_range = self.read_ip(ip_str)
         if port_str is None:
-            self.ports = [22, 23, 80]
+            self.ports = [22, 23, 80, 443]
         else:
             self.ports = self.read_port(port_str)
         self.lock = threading.RLock()
@@ -41,8 +41,9 @@ class PortScan:
         self.q = Queue(maxsize=self.thread_num*3)
         self.gen = None # Generator instance to be instantiated later
         self.show_refused = show_refused
+        if wait_time <= 0:
+            raise "Cannot have negative or zero wait time"
         self.wait_time = wait_time
-        self.queue_status = False
         self.stop_after_count = stop_after_count
         self.ping_counter = 0
 
@@ -101,7 +102,6 @@ class PortScan:
                     self.ping_counter += 1
                 except StopIteration:
                     # Break condition
-                    self.queue_status = True
                     break
             else:
                 time.sleep(0.01)
@@ -143,10 +143,6 @@ class PortScan:
             t = threading.Thread(target=self.worker)
             t.daemon = True
             t.start()
-        if not self.queue_status:
-            # StopIteration has to be raised (generator completed)
-            # Before master thread finishes.
-            time.sleep(0.1)
         self.q.join()
         print("Pinged {} ports".format(self.ping_counter))
         return self.open_results
@@ -173,7 +169,7 @@ Multiple IP in a list delineated by "," and enclosed in [] (e.g. [172.28.31.227,
 """
 
 PORT_HELP_STR = """
-[string] range of ports, default to [22, 23, 80, 443]
+[string] range of ports, default to 22,23,80,443
 accept individual ports and ranges, delineated by "," e.g: 22,80,8000-8010
 """
 
@@ -193,13 +189,14 @@ STOP_AFTER_HELP_STR = """
 [int] Stopping after x many open port has been found, not on by default. Note that the numbers are not exact as threads will continue to finish the existing queue before exiting.
 """
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('ip', nargs='?', default=None, help=IP_HELP_STR)
     parser.add_argument('-p', '--port', action='store', dest='port', help=PORT_HELP_STR)
     parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=500, type=int, help=THREAD_HELP_STR)
     parser.add_argument('-e', '--show_refused', action='store_true', dest='show_refused', default=False, help=SHOW_REFUSED_HELP_STR)
-    parser.add_argument('-w', '--wait', action='store', dest='wait_time', default=5, type=float, help=WAIT_HELP_STR)
+    parser.add_argument('-w', '--wait', action='store', dest='wait_time', default=3, type=float, help=WAIT_HELP_STR)
     parser.add_argument('-s', '--stop_after', action='store', dest='stop_after_count', default=None, type=int, help=STOP_AFTER_HELP_STR)
     args = parser.parse_args()
     if args.ip is None:
@@ -213,6 +210,7 @@ def main():
     scanner = PortScan(ip_str=args.ip, port_str=args.port,
                        thread_num=args.threadnum, show_refused=args.show_refused,
                        wait_time=args.wait_time, stop_after_count=args.stop_after_count)
+    print("Threads will wait for ping response for {} seconds".format(args.wait_time))
     scanner.run()
 
 

@@ -2,7 +2,7 @@
 
 ![PyPI version](http://img.shields.io/pypi/v/portscan.svg) &nbsp; ![Python 3.x](http://img.shields.io/badge/Python-3.x-green.svg) &nbsp; ![PyPI license](https://img.shields.io/github/license/mashape/apistatus.svg) &nbsp; [![Downloads](https://pepy.tech/badge/portscan)](https://pepy.tech/project/portscan)
 
-PortScan is a *light-weight* command line utility that allows user to conduct scanning over a range of IP addresses and port ranges with multi-threading.
+PortScan is a *light-weight* command line utility that allows user to conduct scanning over a range of IP addresses and port ranges with multi-threading. Helpful with finding local stuff like printer, headless raspberry pi, or scanning remote blocks for open ranges of ports.
 
 Install: `pip install portscan`
 
@@ -10,7 +10,7 @@ Upgrade: `pip install portscan --upgrade`
 
 Usage: `portscan [192.168.1.0/24] [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
 
-![Simple Command](/images/Demo_4.png)
+![Simple Command](/images/Demo_0.png)
 
 By default the command checks for your *Local Area Network* IP first, and then initiate a block wise search. specify IP if you want to search any other IP blocks. *Note: This is not available before 0.2.1, please update or specify IP if you're using 0.2.0 and older*
 
@@ -38,7 +38,7 @@ Options:
 
 `-e`, `--show_refused`: show connection errors other than timeouts, e.g. connection refused, permission denied with errno number as they happen.
 
-`-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.1` for faster (local) scanning. Default `3` seconds
+`-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.1` for faster (local) scanning, but this runs a risk of missing the open ports. Default to `3` seconds
 
 `-s`, `--stop_after`: Number of open ports to be discovered after which scan would be gracefully stopped. Default is None for not stopping. Note that it will continue to finish what's left in the queue, so the number of open ports returned might be greater than the value passed in.
 
