@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
     name="portscan",
-    version="0.3.0",
+    version="1.0.0",
     description="Simple port scanning utility at terminal",
     author="Rocky Li",
     author_email="aperocky@gmail.com",
@@ -23,7 +23,7 @@ setup(
         "Environment :: Console",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Natural Language :: English",
-        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: MacOS :: Windows :: Linux",
         "Operating System :: POSIX",
         "Operating System :: Unix",
         "Programming Language :: Python :: 3",

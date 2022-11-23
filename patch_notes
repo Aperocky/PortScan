@@ -1,1 +1,3 @@
 Version 0.3.0: Fixed major bug relating to premature ending of queue. Force ending of queue to be preceded by stopiteration of the generator.
+
+Version 1.0.0: Adding windows support and stop-after argument, with some clean up and adding help strs to argparse.

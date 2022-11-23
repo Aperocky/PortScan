@@ -10,16 +10,11 @@ Upgrade: `pip install portscan --upgrade`
 
 Usage: `portscan [192.168.1.0/24] [-p 22,80-200 [-t 100 [-w 1 [-e]]]]`
 
-*New in version 0.2.1:*
-
-![Simple Command](/images/Demo_3.png)
+![Simple Command](/images/Demo_4.png)
 
 By default the command checks for your *Local Area Network* IP first, and then initiate a block wise search. specify IP if you want to search any other IP blocks. *Note: This is not available before 0.2.1, please update or specify IP if you're using 0.2.0 and older*
 
 Use `-w [float]` to change timeout settings from default of `3` seconds: for LAN, this can be as low as `0.1`. `1` is usually good enough for continental level connection.
-
-![Fast scanning](/images/Demo_2.png)
-*Scanned 5000 ports in 2 seconds*
 
 To show more potential connection, use `-e`, this will show you all ports that are not timed out.
 
@@ -35,8 +30,6 @@ To show more potential connection, use `-e`, this will show you all ports that a
 
     [192.168.1.0/24,8.8.8.8] # The aforementioned 24 block and 8.8.8.8.
 
-    "[192.168.1.0/24, 8.8.8.8]" # if you want to use space in the command, wrap in quotes.
-
 Options:
 
 `-p`, `--port`: port range, default `22,23,80`, use `,` as a delimiter without space, support port range (e.g. `22-100,5000`).
@@ -45,18 +38,20 @@ Options:
 
 `-e`, `--show_refused`: show connection errors other than timeouts, e.g. connection refused, permission denied with errno number as they happen.
 
-`-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.2` for faster scanning. Default `3` seconds
+`-w`, `--wait`: Wait time for socket to respond. If scanning LAN or relatively fast internet connection, this can be set to `1` or even `0.1` for faster (local) scanning. Default `3` seconds
 
-`-s`, `--stop_after_open`: Number of open ports to be discovered after which scan would be gracefully stopped. Default `0` for not stopping.
+`-s`, `--stop_after`: Number of open ports to be discovered after which scan would be gracefully stopped. Default is None for not stopping. Note that it will continue to finish what's left in the queue, so the number of open ports returned might be greater than the value passed in.
 
 ## Python API
-One can also use this portscan inside existing python scripts.  
+
+One can also use this portscan inside existing python scripts.
+
 Consider following example for finding out adb port for Android device in LAN with static IP:
 ```python
 from portscan import PortScan
 ip = '192.168.1.42'
 port_range = '5555,37000-44000'
-scanner = PortScan(ip, port_range, thread_num=500, show_refused=False, wait_time=1, stop_after_open=True)
+scanner = PortScan(ip, port_range, thread_num=500, show_refused=False, wait_time=1, stop_after_count=True)
 open_port_discovered = scanner.run()  # <----- actual scan
 # run returns a list of (ip, open_port) tuples
 adb_port = int(open_port_discovered[0][1])
@@ -71,6 +66,9 @@ device1.close()
 
 print(notifications_dump)
 ```
+
 ## Acknowledgement
 
 Jamieson Becker: For coming up with a way to find local IP on stackoverflow, which I used: https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
+
+Mihir Parikh: Thanks for picking up my ancient project and verifying/supporting Windows and adding flags/return. And for convincing me to wrap it up and putting it in a better place than 4 years ago.

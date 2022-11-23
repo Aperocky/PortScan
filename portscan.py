@@ -7,8 +7,10 @@ import os
 import time
 try:
     from queue import Queue
-except ImportError:
+    from queue import Empty
+except:
     from Queue import Queue
+    from Queue import Empty
 try:
     import resource
     # Expand thread number possible with extended FILE count.
@@ -16,6 +18,7 @@ try:
     resource.setrlimit(resource.RLIMIT_NOFILE, (2048, 2048))
 except ModuleNotFoundError:
     pass  # for windows support, skip this limitation
+
 
 # A multithreading portscan module
 class PortScan:
@@ -25,7 +28,7 @@ class PortScan:
     BLOCK_24 = r'^(?:\d{1,3}\.){3}0\/24$'
     GROUPED_IP = r'^\[.*\]$'
 
-    def __init__(self, ip_str, port_str = None, thread_num = 500, show_refused=False, wait_time=3, stop_after_open=False):
+    def __init__(self, ip_str, port_str=None, thread_num=500, show_refused=False, wait_time=3, stop_after_count=None):
         self.ip_range = self.read_ip(ip_str)
         if port_str is None:
             self.ports = [22, 23, 80]
@@ -35,12 +38,13 @@ class PortScan:
         self.thread_num = thread_num
         if self.thread_num > 2047:
             self.thread_num = 2047
-        self.q = Queue(maxsize=self.thread_num*5)
+        self.q = Queue(maxsize=self.thread_num*3)
         self.gen = None # Generator instance to be instantiated later
         self.show_refused = show_refused
         self.wait_time = wait_time
         self.queue_status = False
-        self.stop_after_open=stop_after_open
+        self.stop_after_count = stop_after_count
+        self.ping_counter = 0
 
     # Read in IP Address from string.
     def read_ip(self, ip_str):
@@ -88,17 +92,44 @@ class PortScan:
 
     # Standalone thread for queue
     def fill_queue(self):
-        while self.stop_after_open!='now':
+        while True:
+            if self.stop_after_count is not None and self.stop_after_count <= 0:
+                return # Found satisfying number of open ports, stop populating queue
             if not self.q.full():
                 try:
                     self.q.put(next(self.gen))
+                    self.ping_counter += 1
                 except StopIteration:
                     # Break condition
                     self.queue_status = True
-                    # print("STOPITERATION") # DEBUG: STOPITERATION should always appear.
                     break
             else:
                 time.sleep(0.01)
+
+    def worker(self):
+        # Worker threads that take ports from queue and consume it
+        while True: # never stop working!
+            try:
+                work = self.q.get()
+                self.ping_port(*work)
+            except Empty:
+                return
+            finally:
+                self.q.task_done()
+
+    def ping_port(self, ip, port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(self.wait_time)
+        status = sock.connect_ex((ip, port))
+        if status == 0:
+            with self.lock:
+                print('{}:{} OPEN'.format(ip, port))
+                self.open_results.append((ip,port))
+                if self.stop_after_count is not None:
+                    self.stop_after_count -= 1
+        elif status not in [35, 64, 65] and self.show_refused:
+            with self.lock:
+                print('{}:{} ERRNO {}, {}'.format(ip, port, status, os.strerror(status)))
         return
 
     def run(self):
@@ -117,33 +148,8 @@ class PortScan:
             # Before master thread finishes.
             time.sleep(0.1)
         self.q.join()
+        print("Pinged {} ports".format(self.ping_counter))
         return self.open_results
-
-    def worker(self):
-        # Worker threads that take ports from queue and consume it
-        while True: # never stop working!
-            work = self.q.get()
-            try:
-                if self.stop_after_open!='now':
-                    self.ping_port(*work)
-            finally: self.q.task_done()
-
-        
-    def ping_port(self, ip, port):
-        # print(port,end=' ')
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(self.wait_time)
-        status = sock.connect_ex((ip, port))
-        if status == 0:
-            with self.lock:
-                print('{}:{} OPEN'.format(ip, port))
-                self.open_results.append((ip,port))
-                if self.stop_after_open:
-                    self.stop_after_open='now' if self.stop_after_open in [1,True] else self.stop_after_open-1
-        elif status not in [35, 64, 65] and self.show_refused:
-            with self.lock:
-                print('{}:{} ERRNO {}, {}'.format(ip, port, status, os.strerror(status)))
-        return
 
 
 def get_local_ip():
@@ -159,14 +165,42 @@ def get_local_ip():
     return IP
 
 
+IP_HELP_STR = """
+[string] Positional Argument, if not provided, will default to your local IP address.
+Accepts Single IP (e.g 172.28.31.227)
+Multiple IP in a list delineated by "," and enclosed in [] (e.g. [172.28.31.227,172.28.31.228])
+24 IP BLOCK (e.g. 172.28.31.0/24)
+"""
+
+PORT_HELP_STR = """
+[string] range of ports, default to [22, 23, 80, 443]
+accept individual ports and ranges, delineated by "," e.g: 22,80,8000-8010
+"""
+
+THREAD_HELP_STR = """
+[int] maximum number of threads, default is 500, maxed at 2047 for safety.
+"""
+
+SHOW_REFUSED_HELP_STR = """
+[boolean flag] Show connection that was responded to but returned a refusal.
+"""
+
+WAIT_HELP_STR = """
+[float] Wait time for response, for local, this can be as low as 0.1, unit in second
+"""
+
+STOP_AFTER_HELP_STR = """
+[int] Stopping after x many open port has been found, not on by default. Note that the numbers are not exact as threads will continue to finish the existing queue before exiting.
+"""
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('ip', nargs='?', default=None)
-    parser.add_argument('-p', '--port', action='store', dest='port')
-    parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=500, type=int)
-    parser.add_argument('-e', '--show_refused', action='store_true', dest='show_refused', default=False)
-    parser.add_argument('-w', '--wait', action='store', dest='wait_time', default=5, type=float)
-    parser.add_argument('-s', '--stop_after', action='store', dest='stop_after_open', default=0, type=int)
+    parser.add_argument('ip', nargs='?', default=None, help=IP_HELP_STR)
+    parser.add_argument('-p', '--port', action='store', dest='port', help=PORT_HELP_STR)
+    parser.add_argument('-t', '--threadnum', action='store', dest='threadnum', default=500, type=int, help=THREAD_HELP_STR)
+    parser.add_argument('-e', '--show_refused', action='store_true', dest='show_refused', default=False, help=SHOW_REFUSED_HELP_STR)
+    parser.add_argument('-w', '--wait', action='store', dest='wait_time', default=5, type=float, help=WAIT_HELP_STR)
+    parser.add_argument('-s', '--stop_after', action='store', dest='stop_after_count', default=None, type=int, help=STOP_AFTER_HELP_STR)
     args = parser.parse_args()
     if args.ip is None:
         print("No IP string found, using local address")
@@ -178,7 +212,7 @@ def main():
         args.ip = ipfinal
     scanner = PortScan(ip_str=args.ip, port_str=args.port,
                        thread_num=args.threadnum, show_refused=args.show_refused,
-                       wait_time=args.wait_time, stop_after_open=args.stop_after_open)
+                       wait_time=args.wait_time, stop_after_count=args.stop_after_count)
     scanner.run()
 
 
