@@ -108,14 +108,13 @@ class PortScan:
 
     def worker(self):
         # Worker threads that take ports from queue and consume it
-        while True: # never stop working!
+        while True:
             try:
-                work = self.q.get()
+                work = self.q.get_nowait()
                 self.ping_port(*work)
+                self.q.task_done()
             except Empty:
                 return
-            finally:
-                self.q.task_done()
 
     def ping_port(self, ip, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -136,12 +135,10 @@ class PortScan:
         # Generator that contains all ip:port pairs.
         self.gen = ((ip, port) for ip in self.ip_range for port in self.ports)
         queue_thread = threading.Thread(target=self.fill_queue)
-        queue_thread.daemon = True
         queue_thread.start()
         self.open_results = []
         for i in range(self.thread_num):
             t = threading.Thread(target=self.worker)
-            t.daemon = True
             t.start()
         self.q.join()
         print("Pinged {} ports".format(self.ping_counter))

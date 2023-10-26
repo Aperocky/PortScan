@@ -8,7 +8,7 @@ with open("readme.md", encoding='utf-8') as f:
 
 setup(
     name="portscan",
-    version="1.0.1.post2",
+    version="1.1",
     description="Simple port scanning utility at terminal",
     author="Rocky Li",
     author_email="aperocky@gmail.com",
